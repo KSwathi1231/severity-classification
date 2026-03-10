@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MediScan - Prediction Result</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fb;
+            padding: 30px;
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: #ff4d4d;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        .logout-btn:hover {
+            background: #e60000;
+        }
+
+        .container {
+            width: 450px;
+            margin: 80px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0px 0px 20px rgba(0,0,0,0.15);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .error {
+            background: #ffdddd;
+            color: #a10000;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .result {
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .critical { background: #ffe0e0; color: #b30000; }
+        .moderate { background: #fff5cc; color: #b38f00; }
+        .normal   { background: #ddffdd; color: #008000; }
+
+        .btn {
+            margin-top: 15px;
+            padding: 10px 18px;
+            border-radius: 8px;
+            border: none;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .btn:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="/" class="logout-btn">Logout</a>
+
+    <div class="container">
+        <h2>Prediction Result</h2>
+
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% else %}
+            {% set cls = label.lower() %}
+            <div class="result {{ cls }}">
+                <p><strong>Patient Name:</strong> {{ name }}</p>
+                <p><strong>Phone:</strong> {{ phone }}</p>
+                <p><strong>Place:</strong> {{ place }}</p>
+                <p><strong>Age:</strong> {{ age }}</p>
+                <hr>
+                <p><strong>Severity:</strong> {{ label }}</p>
+                <p>{{ result }}</p>
+                <hr>
+
+                <p><strong>Explanation:</strong></p>
+                <p>{{ explanation }}</p>
+            </div>
+        {% endif %}
+
+        <form action="/start">
+            <button class="btn">New Prediction</button>
+        </form>
+    </div>
+
+</body>
+</html>

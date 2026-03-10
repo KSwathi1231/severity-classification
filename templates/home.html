@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MediScan - Chest X-ray Severity Classification</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+
+            /* ✅ Local healthcare background image from static folder */
+            background-image: url("{{ url_for('static', filename='health.jpeg') }}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+
+            height: 100vh;
+        }
+
+        .overlay {
+            background: rgba(5, 238, 199, 0.116); /* dark transparent layer */
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            text-align: center;
+            color: white;
+            background: rgba(58, 57, 57, 0.75);
+            padding: 40px;
+            border-radius: 12px;
+            width: 55%;
+        }
+
+        h1 {
+            font-size: 38px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 14px 30px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="overlay">
+        <div class="container">
+            <h1>MediScan – Chest X-ray Severity Classification</h1>
+            <form action="/start">
+                <button class="btn">Get Started</button>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>

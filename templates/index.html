@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MediScan - X-ray Upload</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fb; /* Soft medical light background */
+            padding: 30px;
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: #ff4d4d;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        .logout-btn:hover {
+            background: #e60000;
+        }
+
+        .container {
+            width: 440px;
+            margin: 70px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0px 0px 20px rgb(0 0 0 / 15%);
+        }
+
+        input, button {
+            width: 90%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .result, .error {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 17px;
+        }
+
+        .error {
+            background: #ffdddd;
+            color: #a10000;
+        }
+
+        .result {
+            background: #ddffdd;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Logout button -->
+    <a href="/" class="logout-btn">Logout</a>
+
+    <div class="container">
+        <h2>Upload Chest X-ray</h2>
+
+        <form method="POST" enctype="multipart/form-data" action="/predict">
+            <input type="text" name="name" placeholder="Patient Name" required>
+            <input type="text" name="phone" placeholder="Phone Number" required>
+            <input type="number" name="age" placeholder="Age" required>
+            <input type="text" name="place" placeholder="Place" required>
+            <input type="file" name="xray" accept="image/*" required>
+            <button type="submit">Submit</button>
+        </form>
+
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+
+        {% if result %}
+            <div class="result">
+                <p><strong>Prediction:</strong> {{ label }}</p>
+                <p>{{ result }}</p>
+            </div>
+        {% endif %}
+    </div>
+
+</body>
+</html>
