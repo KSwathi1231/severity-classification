@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}MediScan{% endblock %}</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #020617, #0f172a);
+        }
+
+        /* 🔷 NAVBAR */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 40px;
+            background: linear-gradient(135deg, #0d6efd, #00c6ff);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .navbar h2 {
+            margin: 0;
+            font-size: 26px;
+        }
+
+        .nav-links a {
+            margin: 0 15px;
+            text-decoration: none;
+            color: white;
+            font-size: 16px;
+        }
+
+        .logout {
+            background: #ff4d4d;
+            padding: 8px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .container {
+            padding: 30px 50px;
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+<!-- 🔷 COMMON NAVBAR -->
+<div class="navbar">
+    <h2>MediScan</h2>
+
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/upload">Patient Details</a>
+        <a href="/result">Result</a>
+        <a href="/dashboard">Dashboard</a>
+    </div>
+
+    <a href="/" class="logout">Logout</a>
+</div>
+
+<!-- 🔷 PAGE CONTENT -->
+<div class="container">
+    {% block content %}{% endblock %}
+</div>
+
+</body>
+</html>

@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    h2 {
+        color: white;
+        margin-bottom: 20px;
+    }
+
+    h3 {
+        color: #38bdf8;
+        margin-top: 25px;
+    }
+
+    .table-container {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th {
+        background: #0d6efd;
+        color: white;
+        padding: 10px;
+    }
+
+    td {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        color: #1e293b;
+    }
+
+    .critical { color: red; font-weight: bold; }
+    .moderate { color: orange; font-weight: bold; }
+    .normal { color: green; font-weight: bold; }
+
+    .status-btn {
+        background: #ffd166;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+
+    .delete-btn {
+        background: #ef233c;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+
+    .add-btn {
+    background: #22c55e;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.3s;
+    }
+
+    .add-btn:hover {
+        background: #16a34a;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div style="display:flex; justify-content:space-between; align-items:center;">
+
+    <h2>Patient Records (Last 7 Days)</h2>
+
+    <a href="/upload">
+        <button class="add-btn">+ Another Patient</button>
+    </a>
+
+</div>
+
+{% for date, patients in grouped.items() %}
+
+    <h3>📅 {{ date }}</h3>
+
+    <div class="table-container">
+        <table>
+            <tr>
+                <th>Time</th>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Phone</th>
+                <th>Place</th>
+                <th>Severity</th>
+                <th>Status</th>
+                <th>Delete</th>
+            </tr>
+
+            {% for p in patients %}
+            <tr>
+                <td>{{ p.time }}</td>
+                <td>{{ p.name }}</td>
+                <td>{{ p.age }}</td>
+                <td>{{ p.phone }}</td>
+                <td>{{ p.place }}</td>
+
+                <td class="{{ p.label | lower }}">
+                    {{ p.label }}
+                </td>
+
+                <td>
+                    <a href="/update_status/{{ p.id }}">
+                        <button class="status-btn">{{ p.status }}</button>
+                    </a>
+                </td>
+
+                <td>
+                    <a href="/delete/{{ p.id }}">
+                        <button class="delete-btn">Delete</button>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+
+        </table>
+    </div>
+
+{% endfor %}
+
+{% endblock %}

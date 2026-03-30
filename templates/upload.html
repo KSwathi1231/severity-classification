@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Patient Details{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Center form properly */
+    .main {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 80px); /* adjust for navbar */
+    }
+
+    body {
+        background: linear-gradient(135deg, #020617, #0f172a);
+    }
+    /* Form Card */
+    .form-card {
+        padding: 25px 30px;   /* 🔽 reduced padding */
+        border-radius: 12px;
+        width: 450px;       /* 🔽 slightly smaller */
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        background: rgba(255, 255, 255, 0.9); /* semi-transparent */
+        backdrop-filter: blur(10px);
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 15px;   /* 🔽 reduced */
+        color: #1e293b;
+        font-size: 22px;
+    }
+
+    /* Inputs */
+    input {
+        width: 100%;
+        padding: 8px;         /* 🔽 reduced */
+        margin: 6px 0 10px 0; /* 🔽 tighter spacing */
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        outline: none;
+        font-size: 14px;
+        color: #1e293b;
+    }
+
+    input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 4px rgba(59,130,246,0.3);
+    }
+
+    label {
+        font-size: 20px;
+        color: #1e293b;
+    }
+
+    /* Button */
+    .btn {
+        width: 100%;
+        padding: 10px;
+        background: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 15px;
+        cursor: pointer;
+        transition: 0.3s;
+        margin-top: 5px;
+    }
+
+    .btn:hover {
+        background: #2563eb;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="main">
+    <div class="form-card">
+
+        <h2>Upload Patient Details</h2>
+
+        <form action="/predict" method="POST" enctype="multipart/form-data">
+
+            <label>Name</label>
+            <input type="text" name="name" required>
+
+            <label>Age</label>
+            <input type="number" name="age" required>
+
+            <label>Phone</label>
+            <input type="text" name="phone" required>
+
+            <label>Place</label>
+            <input type="text" name="place" required>
+
+            <label>X-ray Image</label>
+            <input type="file" name="xray" required>
+
+            <button class="btn">Submit</button>
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

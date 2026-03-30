@@ -1,96 +1,113 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>MediScan - Prediction Result</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f4f7fb;
-            padding: 30px;
-        }
+{% extends "base.html" %}
 
-        .logout-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            padding: 10px 20px;
-            background: #ff4d4d;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: bold;
-        }
+{% block title %}Prediction Result{% endblock %}
 
-        .logout-btn:hover {
-            background: #e60000;
-        }
+{% block extra_css %}
+<style>
+    .result-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 80vh;
+    }
+    body {
+        background: linear-gradient(135deg, #020617, #0f172a);
+    }
+    .card {
+        width: 450px;
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
 
-        .container {
-            width: 450px;
-            margin: 80px auto;
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0px 0px 20px rgba(0,0,0,0.15);
-        }
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #1e293b;
+    }
 
-        h2 {
-            text-align: center;
-            margin-bottom: 15px;
-        }
+    .result-box {
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+    }
 
-        .error {
-            background: #ffdddd;
-            color: #a10000;
-            padding: 15px;
-            border-radius: 8px;
-        }
+    /* 🔥 Severity Colors */
+    .critical {
+        background: #ffe0e0;
+        color: #b30000;
+    }
 
-        .result {
-            padding: 15px;
-            border-radius: 8px;
-        }
+    .moderate {
+        background: #fff5cc;
+        color: #b38f00;
+    }
 
-        .critical { background: #ffe0e0; color: #b30000; }
-        .moderate { background: #fff5cc; color: #b38f00; }
-        .normal   { background: #ddffdd; color: #008000; }
+    .normal {
+        background: #ddffdd;
+        color: #008000;
+    }
 
-        .btn {
-            margin-top: 15px;
-            padding: 10px 18px;
-            border-radius: 8px;
-            border: none;
-            background: #007bff;
-            color: white;
-            cursor: pointer;
-            font-size: 15px;
-        }
+    p {
+        margin: 8px 0;
+        font-size: 15px;
+    }
 
-        .btn:hover {
-            background: #0056b3;
-        }
-    </style>
-</head>
-<body>
+    hr {
+        margin: 10px 0;
+        border: none;
+        border-top: 1px solid #ddd;
+    }
 
-    <a href="/" class="logout-btn">Logout</a>
+    /* Button */
+    .btn {
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        background: #0d6efd;
+        color: white;
+        border: none;
+        font-size: 15px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
 
-    <div class="container">
+    .btn:hover {
+        background: #084298;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="result-container">
+    <div class="card">
+
         <h2>Prediction Result</h2>
 
         {% if error %}
-            <div class="error">{{ error }}</div>
+            <p style="color:red;">{{ error }}</p>
         {% else %}
             {% set cls = label.lower() %}
-            <div class="result {{ cls }}">
-                <p><strong>Patient Name:</strong> {{ name }}</p>
+            
+            <div class="result-box {{ cls }}">
+                <p><strong>Name:</strong> {{ name }}</p>
                 <p><strong>Phone:</strong> {{ phone }}</p>
                 <p><strong>Place:</strong> {{ place }}</p>
                 <p><strong>Age:</strong> {{ age }}</p>
+
                 <hr>
+
                 <p><strong>Severity:</strong> {{ label }}</p>
+
+                <!-- 🔥 Confidence -->
+                <p><strong>Confidence:</strong> 
+                    {{ (confidence * 100) | round(2) }}%
+                </p>
+
                 <p>{{ result }}</p>
+
                 <hr>
 
                 <p><strong>Explanation:</strong></p>
@@ -98,10 +115,21 @@
             </div>
         {% endif %}
 
-        <form action="/start">
-            <button class="btn">New Prediction</button>
-        </form>
-    </div>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
 
-</body>
-</html>
+    <!-- New Prediction -->
+    <a href="/upload" style="flex:1;">
+        <button class="btn">New Prediction</button>
+    </a>
+
+    <!-- Go to Dashboard -->
+    <a href="/dashboard" style="flex:1;">
+        <button class="btn dashboard-btn">Go to Dashboard</button>
+    </a>
+
+</div>
+
+    </div>
+</div>
+
+{% endblock %}
