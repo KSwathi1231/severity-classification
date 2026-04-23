@@ -4,15 +4,29 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.applications.resnet50 import preprocess_input
 from PIL import Image
 from  collections import defaultdict
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Image as RLImage, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+from flask import send_file
 import json
 import os
 import time
 import datetime
+import json
+
+DATA_FILE = "patients.json"
+
+def load_patients():
+    if not os.path.exists(DATA_FILE):
+        return []
+    with open(DATA_FILE, "r") as f:
+        return json.load(f)
+
+def save_patients(patients):
+    with open(DATA_FILE, "w") as f:
+        json.dump(patients, f)
 
 current_time = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-now = datetime.datetime.now()
-date_str = now.strftime("%d-%m-%Y")
-time_str = now.strftime("%H:%M:%S.%f")[:-3]   # milliseconds
 app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = "uploads"
 app.secret_key = "swathi-secret-key"
@@ -90,6 +104,9 @@ def upload():
 # 🔥 MAIN PREDICTION LOGIC
 @app.route("/predict", methods=["POST"])
 def predict():
+    now = datetime.datetime.now()
+    date_str = now.strftime("%d-%m-%Y")
+    time_str = now.strftime("%H:%M:%S.%f")[:-3]   # milliseconds
     name = request.form["name"]
     phone = request.form["phone"]
     age = request.form["age"]
@@ -128,6 +145,7 @@ def predict():
         "result": message,
         "explanation": explanation,
         "status": "Pending",
+        "image_path": file_path 
         
     }
 
@@ -135,9 +153,9 @@ def predict():
     if "patients" not in session:
         session["patients"] = []
 
-    patients = session["patients"]
+    patients = load_patients()
     patients.append(patient)
-    session["patients"] = patients
+    save_patients(patients)
 
     # store last result for result page
     session["result"] = patient
@@ -162,7 +180,7 @@ def result():
 
 @app.route("/dashboard")
 def dashboard():
-    patients = session.get("patients", [])
+    patients = load_patients()
 
     today = datetime.datetime.now()
 
@@ -196,29 +214,196 @@ def dashboard():
 
     return render_template("dashboard.html", grouped=grouped)
 
+@app.route('/download_report')
+def download_report():
+
+    patients = load_patients()   # ✅ FIX
+    if not patients:
+        return "No data available"
+
+    patient = patients[-1]
+
+    pdf_path = os.path.join(os.getcwd(), "report.pdf")
+    doc = SimpleDocTemplate(pdf_path, pagesize=letter)
+
+    styles = getSampleStyleSheet()
+    content = []
+
+    from reportlab.lib import colors
+
+    # Title
+    content.append(Paragraph("<b><font size=16>AI Medical Diagnostic Report</font></b>", styles['Title']))
+    content.append(Spacer(1, 10))
+
+    # Report Info
+    content.append(Paragraph(f"<b>Report ID:</b> {patient['id']}", styles['Normal']))
+    content.append(Paragraph(f"<b>Date:</b> {patient['date']} {patient['time']}", styles['Normal']))
+    content.append(Spacer(1, 10))
+
+    # Patient Section
+    content.append(Paragraph("<b>Patient Information</b>", styles['Heading2']))
+    content.append(Paragraph(f"Name: {patient['name']}", styles['Normal']))
+    content.append(Paragraph(f"Age: {patient['age']}", styles['Normal']))
+    content.append(Paragraph(f"Phone: {patient['phone']}", styles['Normal']))
+    content.append(Paragraph(f"Location: {patient['place']}", styles['Normal']))
+    content.append(Spacer(1, 10))
+
+    # Severity Color Logic
+    severity = patient['label']
+    if severity == "Critical":
+        sev_color = "red"
+    elif severity == "Moderate":
+        sev_color = "orange"
+    else:
+        sev_color = "green"
+
+    # Prediction Section
+    content.append(Paragraph("<b>Prediction Summary</b>", styles['Heading2']))
+    content.append(Paragraph(
+        f"<b>Severity:</b> <font color='{sev_color}'><b>{severity}</b></font>",
+        styles['Normal']
+    ))
+    content.append(Paragraph(
+        f"<b>Confidence:</b> {round(patient['confidence']*100,2)}%",
+        styles['Normal']
+    ))
+    content.append(Paragraph(
+        f"<b>Clinical Note:</b> {patient['explanation']}",
+        styles['Normal']
+    ))
+    content.append(Spacer(1, 15))
+
+    # Image Section
+    content.append(Paragraph("<b>Chest X-ray Image</b>", styles['Heading2']))
+    try:
+        img = RLImage(patient['image_path'], width=250, height=250)
+        content.append(img)
+    except:
+        content.append(Paragraph("Image not available", styles['Normal']))
+
+    content.append(Spacer(1, 20))
+
+    # Recommendation Section
+    content.append(Paragraph("<b>Recommendation</b>", styles['Heading2']))
+    content.append(Paragraph(patient['result'], styles['Normal']))
+    content.append(Spacer(1, 15))
+
+    doc.build(content)
+
+    return send_file(pdf_path, as_attachment=True, download_name="Medical_Report.pdf")
+
+@app.route('/download_report/<int:id>')
+def download_report_by_id(id):
+
+    patients = load_patients()
+
+    # 🔍 Find selected patient
+    patient = None
+    for p in patients:
+        if p["id"] == id:
+            patient = p
+            break
+
+    if not patient:
+        return "Patient not found"
+
+    # 📄 Create PDF path
+    pdf_path = os.path.join(os.getcwd(), f"report_{id}.pdf")
+
+    doc = SimpleDocTemplate(pdf_path, pagesize=letter)
+    styles = getSampleStyleSheet()
+    content = []
+
+    from reportlab.lib import colors
+
+    # 🏥 Title
+    content.append(Paragraph("<b><font size=16>AI Medical Diagnostic Report</font></b>", styles['Title']))
+    content.append(Spacer(1, 10))
+
+    # 📌 Report Info
+    content.append(Paragraph(f"<b>Report ID:</b> {patient['id']}", styles['Normal']))
+    content.append(Paragraph(f"<b>Date:</b> {patient['date']} {patient['time']}", styles['Normal']))
+    content.append(Spacer(1, 10))
+
+    # 👤 Patient Info
+    content.append(Paragraph("<b>Patient Information</b>", styles['Heading2']))
+    content.append(Paragraph(f"Name: {patient['name']}", styles['Normal']))
+    content.append(Paragraph(f"Age: {patient['age']}", styles['Normal']))
+    content.append(Paragraph(f"Phone: {patient['phone']}", styles['Normal']))
+    content.append(Paragraph(f"Place: {patient['place']}", styles['Normal']))
+    content.append(Spacer(1, 10))
+
+    # 🎯 Severity color logic
+    severity = patient['label']
+    if severity == "Critical":
+        sev_color = "red"
+    elif severity == "Moderate":
+        sev_color = "orange"
+    else:
+        sev_color = "green"
+
+    # 🧠 Prediction Section
+    content.append(Paragraph("<b>Prediction Summary</b>", styles['Heading2']))
+    content.append(Paragraph(
+        f"<b>Severity:</b> <font color='{sev_color}'><b>{severity}</b></font>",
+        styles['Normal']
+    ))
+    content.append(Paragraph(
+        f"<b>Confidence:</b> {round(patient['confidence']*100,2)}%",
+        styles['Normal']
+    ))
+    content.append(Paragraph(
+        f"<b>Explanation:</b> {patient['explanation']}",
+        styles['Normal']
+    ))
+    content.append(Spacer(1, 15))
+
+    # 🖼️ X-ray Image
+    content.append(Paragraph("<b>Chest X-ray</b>", styles['Heading2']))
+    try:
+        img = RLImage(patient['image_path'], width=250, height=250)
+        content.append(img)
+    except:
+        content.append(Paragraph("Image not available", styles['Normal']))
+
+    content.append(Spacer(1, 15))
+
+    # 💊 Recommendation
+    content.append(Paragraph("<b>Recommendation</b>", styles['Heading2']))
+    content.append(Paragraph(patient['result'], styles['Normal']))
+    content.append(Spacer(1, 15))
+
+
+    # 🏗️ Build PDF
+    doc.build(content)
+
+    # 📥 Send file
+    return send_file(pdf_path, as_attachment=True, download_name=f"Report_{id}.pdf")
+
+
+
+
 # 🔥 DELETE PATIENT
-@app.route("/delete/<int:pid>")
-def delete(pid):
-    patients = session.get("patients", [])
-    patients = [p for p in patients if p["id"] != pid]
-    session["patients"] = patients
+@app.route("/delete/<int:id>")
+def delete(id):
+    patients = load_patients()
+
+    patients = [p for p in patients if p["id"] != id]
+
+    save_patients(patients)
 
     return redirect(url_for("dashboard"))
 
-
 # 🔥 UPDATE STATUS
-@app.route("/update_status/<int:pid>")
-def update_status(pid):
-    patients = session.get("patients", [])
+@app.route("/update_status/<int:id>")
+def update_status(id):
+    patients = load_patients()
 
     for p in patients:
-        if p["id"] == pid:
-            if p["status"] == "Pending":
-                p["status"] = "Completed"
-            else:
-                p["status"] = "Pending"
+        if p["id"] == id:
+            p["status"] = "Completed" if p["status"] == "Pending" else "Pending"
 
-    session["patients"] = patients
+    save_patients(patients)
 
     return redirect(url_for("dashboard"))
 
@@ -226,3 +411,4 @@ def update_status(pid):
 # ------------------------------
 if __name__ == "__main__":
     app.run(debug=True)
+

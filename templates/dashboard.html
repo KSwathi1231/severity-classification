@@ -71,6 +71,18 @@
     .add-btn:hover {
         background: #16a34a;
     }
+    .download-btn {
+    background: #28a745;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+    .download-btn:hover {
+        background: #218838;
+    }
 </style>
 {% endblock %}
 
@@ -101,6 +113,7 @@
                 <th>Severity</th>
                 <th>Status</th>
                 <th>Delete</th>
+                <th>Download</th>
             </tr>
 
             {% for p in patients %}
@@ -125,6 +138,9 @@
                     <a href="/delete/{{ p.id }}">
                         <button class="delete-btn">Delete</button>
                     </a>
+                    <td>
+                    <a href="/download_report/{{ p.id }}" class="download-btn">Download</a>
+</td>
                 </td>
             </tr>
             {% endfor %}
